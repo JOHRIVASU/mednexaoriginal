@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nearest Hospital Locator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 500px;"></div>
+
+  <script>
+    var map = L.map('map').setView([0, 0], 13); // Center the map at (0, 0) initially
+
+    // Add a tile layer (you can choose your own)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Get the user's location
+    map.locate({ setView: true, maxZoom: 16 });
+
+    // Function to find the nearest hospital
+    function findNearestHospital(userLocation) {
+      // You would typically use a geocoding API to get hospital locations
+      // For this example, we'll create a sample hospital location
+      var hospitals = [
+        { name: "Hospital 1", lat: 12.9270, lon: 79.1353 },
+        // Add more hospitals here
+      ];
+      
+      var nearestHospital;
+      var nearestDistance = Infinity;
+
+      hospitals.forEach(function (hospital) {
+        var hospitalLocation = L.latLng(12.9270, 79.1353);
+        var distance = userLocation.distanceTo(hospitalLocation);
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestHospital = hospital;
+        }
+      });
+
+      return nearestHospital;
+    }
+
+    // Listen for location found event
+    map.on('locationfound', function (e) {
+      var userLocation = e.latlng;
+      var nearestHospital = findNearestHospital(userLocation);
+
+      // Add a marker for the user's location
+      L.marker(userLocation).addTo(map).bindPopup('Your Location');
+
+      // Add a marker for the nearest hospital
+      L.marker([12.9270, 79.1353])
+        .addTo(map)
+        .bindPopup(nearestHospital.name + ' (Nearest Hospital)');
+
+      // Define a custom icon for the marker
+      var customIcon = L.icon({
+        iconUrl: 'https://iconduck.com/icons/222739/hospital', // Replace with the correct image path
+        iconSize: [20, 20],
+        iconAnchor: [10, 10], // Adjust the iconAnchor based on your image dimensions
+      });
+
+      // Add a marker with the custom icon
+      var marker = L.marker([userLocation.lat, userLocation.lng], { icon: customIcon }).addTo(map);
+    });
+
+    // Handle location error
+    map.on('locationerror', function (e) {
+      alert("Location access denied or an error occurred.");
+    });
+  </script>
+</body>
+</html>
